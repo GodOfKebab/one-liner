@@ -6,7 +6,7 @@ Example usages:
 $ oneliner cr --filepath src/welcome_god_of_kebab.py --name greet_the_god
     
     Execute the following in shell for changes to take effect:
-    $ source /Users/yasaridikut/PycharmProjects/one-liner/src/.one-liner
+    $ source .../one-liner/src/.one-liner
 
 $ oneliner ls
     greet_the_god
