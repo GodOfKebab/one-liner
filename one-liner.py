@@ -77,6 +77,8 @@ class OneLiner:
         with open(OneLiner.one_liner_alias_file, 'a+', encoding='utf-8') as file:
             file.write("\n" + one_liner + "\n")
 
+        OneLiner._source()
+
     def _handle_args_required(self, name_required=False, name_and_filepath_required=False):
         if name_and_filepath_required:
             if (not self.args.name) and self.args.filepath:
