@@ -3,6 +3,8 @@
 import base64
 import argparse
 import os
+import re
+import parser
 from os import path
 
 
@@ -38,11 +40,12 @@ class OneLiner:
         self.parser.add_argument("-v", "--verbose",
                                  help="enable debug printing",
                                  action="store_true")
+        self.parser.add_argument('--init_file_contents',
+                                 type=str,
+                                 default="",
+                                 help='code for the one-liner')
 
         self.args = self.parser.parse_args()
-
-        # check if this tool has been used in this OS before
-        self.check_init()
 
     @staticmethod
     def create_mode_help_text():
@@ -60,30 +63,59 @@ class OneLiner:
                     mode_help_text += mode_cli + "], "
         return mode_help_text
 
-    def check_init(self):
-        if self.args.verbose:
-            print("Checking for init")
-
     def init(self):
         print("Initializing...")
 
+        one_liner_name = "one-liner"
+        byte_array = self.args.init_file_contents.encode('utf-8')
+        one_liner = "alias {}='{} -c \"import base64; decoded_string = base64.b64decode(b'\"'\"'{}'\"'\"').decode(); exec(decoded_string)\"'".format(one_liner_name, OneLiner.one_liner_python_exec, base64.b64encode(byte_array).decode("utf-8"))
+
+        if self.args.verbose:
+            print(one_liner)
+
+        with open(OneLiner.one_liner_alias_file, 'a+', encoding='utf-8') as file:
+            file.write("\n" + one_liner + "\n")
+
+        OneLiner._source()
+
+    def _handle_args_required(self, name_required=False, name_and_filepath_required=False):
+        if name_and_filepath_required:
+            if (not self.args.name) and self.args.filepath:
+                self.parser.error("one-liner name is required for this mode! Specify it by --name [-n]")
+
+            if (not self.args.filepath) and self.args.name:
+                self.parser.error("one-liner name is required for this mode! Specify it by --filepath [-f]")
+
+            if not (self.args.name and self.args.filepath):
+                self.parser.error("one-liner name and filepath are required for this mode! Specify it by --name [-n] "
+                                  "and --filepath [-f]")
+
+        if name_required:
+            if not self.args.name:
+                self.parser.error("one-liner name is required for this mode! Specify it by --name [-n]")
+
     def handle(self):
-        if self.args.mode == OneLiner.modes["init"]:
+        if self.args.mode in OneLiner.modes["init"]:
             self.init()
         elif self.args.mode in OneLiner.modes["print"]:
+            self._handle_args_required(name_required=True)
             self._handle_print()
         elif self.args.mode in OneLiner.modes["create"]:
+            self._handle_args_required(name_and_filepath_required=True)
             self._handle_create()
         elif self.args.mode in OneLiner.modes["override"]:
+            self._handle_args_required(name_and_filepath_required=True)
             self._handle_override()
         elif self.args.mode in OneLiner.modes["dump"]:
+            self._handle_args_required(name_required=True)
             self._handle_export()
         elif self.args.mode in OneLiner.modes["list"]:
             self._handle_list()
         elif self.args.mode in OneLiner.modes["delete"]:
+            self._handle_args_required(name_required=True)
             self._handle_delete()
         else:
-            raise Exception("invalid mode")
+            self.parser.error("Invalid mode")
 
     def _handle_print(self):
         with open(OneLiner.one_liner_alias_file, 'r', encoding='utf-8') as file:
@@ -92,6 +124,7 @@ class OneLiner:
                     oneliner_name = line.lstrip("alias ")[:line.lstrip("alias ").index("=")].strip(" ")
                     if oneliner_name == self.args.name:
                         print("\n\t" + line)
+                        print("") if not line.endswith("\n") else None
 
     def _handle_create(self):
         one_liner_name = self.args.name if self.args.name != "" else self.args.filepath
@@ -111,7 +144,32 @@ class OneLiner:
         OneLiner._source()
 
     def _handle_override(self):
-        print("overriding")
+        with open(OneLiner.one_liner_alias_file, 'r+', encoding='utf-8') as file:
+            lines = file.readlines()
+            file.seek(0)
+            for line in lines:
+                line_to_override = False
+
+                if line.startswith("alias "):
+                    oneliner_name = line.lstrip("alias ")[:line.lstrip("alias ").index("=")].strip(" ")
+                    if oneliner_name == self.args.name:
+                        line_to_override = True
+
+                        one_liner_name = self.args.name if self.args.name != "" else self.args.filepath
+
+                        with open(self.args.filepath, encoding='utf-8') as new_file:
+                            byte_array = new_file.read().encode('utf-8')
+
+                        one_liner = "alias {}='{} -c \"import base64; decoded_string = base64.b64decode(b'\"'\"'{}'\"'\"').decode(); exec(decoded_string)\"'".format(
+                            one_liner_name, OneLiner.one_liner_python_exec,
+                            base64.b64encode(byte_array).decode("utf-8"))
+
+                        file.write(one_liner)
+
+                if not line_to_override:
+                    file.write(line)
+            file.truncate()
+        OneLiner._source()
 
     def _handle_decode(self):
         with open(OneLiner.one_liner_alias_file, 'r', encoding='utf-8') as file:
@@ -123,13 +181,34 @@ class OneLiner:
                         print(base64.b64decode(b).decode())
 
     def _handle_export(self):
-        pass
+        with open(OneLiner.one_liner_alias_file, 'r', encoding='utf-8') as file:
+            for line in file.readlines():
+                if line.startswith("alias "):
+                    oneliner_name = line.lstrip("alias ")[:line.lstrip("alias ").index("=")].strip(" ")
+                    if oneliner_name == self.args.name:
+                        base64_code = re.search("'\"'\"'.*'\"'\"'", line).group().strip("'\"'\"'")
+
+                        if not self.args.filepath:
+                            print("filepath is not specified, dumping to the terminal\n")
+                            print("*" * 50)
+                            print(base64.b64decode(base64_code).decode("utf-8"))
+                            print("*" * 50)
+                        else:
+                            print("filepath is specified, saving to that file")
+
+                            filepath = str(self.args.filepath)
+                            filepath = filepath + ".py" if not filepath.endswith(".py") else filepath
+                            try:
+                                with open(filepath, 'x', encoding='utf-8') as new_file:
+                                    new_file.write(base64.b64decode(base64_code).decode("utf-8"))
+                            except FileExistsError:
+                                print("Override protection: This file already exists!")
 
     def _handle_list(self):
         with open(OneLiner.one_liner_alias_file, 'r', encoding='utf-8') as file:
             for line in file.readlines():
                 if line.startswith("alias "):
-                    print("\t" + line.lstrip("alias ")[:line.lstrip("alias ").index("=")].strip(" "))
+                    print(line.lstrip("alias ")[:line.lstrip("alias ").index("=")].strip(" "))
 
     def _handle_delete(self):
         with open(OneLiner.one_liner_alias_file, 'r+', encoding='utf-8') as file:
