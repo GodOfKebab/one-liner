@@ -1,6 +1,6 @@
 # This file is all you need for one-liner tool to work.
 # PARAMETERS START
-ONELINER_PATH="$(dirname "$0")/$(basename "$0")"
+ONELINER_PATH="$HOME/.one-liner"
 export ONELINER_PATH
 
 ONELINER_PYTHON_EXEC="python3"
