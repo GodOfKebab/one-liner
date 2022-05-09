@@ -1,6 +1,10 @@
 # one-liner
 This is the tool I use for creating one-liner python executables.
 
+Installation:
+
+```curl -L https://raw.githubusercontent.com/GodOfKebab/one-liner/master/install.sh | bash```
+
 Example usages:
 ```
 $ oneliner cr --filepath src/welcome_god_of_kebab.py --name greet_the_god

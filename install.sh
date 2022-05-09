@@ -19,5 +19,5 @@ elif [ $SHELL = "/bin/zsh" ]; then
 fi
 
 . "$HOME/.one-liner"
-echo "All set. You can start using one-liner."
+echo "All set. You can start using one-liner after sourcing."
 
