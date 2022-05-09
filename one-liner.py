@@ -67,7 +67,9 @@ class OneLiner:
         print("Initializing...")
 
         one_liner_name = "one-liner"
+        print(one_liner_name)
         byte_array = self.args.init_file_contents.encode('utf-8')
+        print(byte_array)
         one_liner = "alias {}='{} -c \"import base64; decoded_string = base64.b64decode(b'\"'\"'{}'\"'\"').decode(); exec(decoded_string)\"'".format(one_liner_name, OneLiner.one_liner_python_exec, base64.b64encode(byte_array).decode("utf-8"))
 
         # if self.args.verbose:
