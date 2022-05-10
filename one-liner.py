@@ -15,7 +15,8 @@ class OneLiner:
              "print":    ["print", "pr", "cat"],
              "dump":     ["dump", "dmp"],
              "list":     ["list", "ls"],
-             "delete":   ["delete", "del", "rm"]}
+             "delete":   ["delete", "del", "rm"],
+             "sync":     ["sync"]}
 
     one_liner_alias_file = os.environ["ONELINER_PATH"]
     one_liner_python_exec = os.environ["ONELINER_PYTHON_EXEC"]
@@ -76,7 +77,7 @@ class OneLiner:
 
         # add the one-liner.py as a one-liner
         with open(OneLiner.one_liner_alias_file, 'a+', encoding='utf-8') as file:
-            file.write("\n" + one_liner + "\n")
+            file.write("\n" + one_liner + "\n\n" + "#"*10 + " sync below " + "#"*10 + "\n")
 
         # add the "source $HOME/.one-liner" to the .bashrc/.zshrc
         home = os.environ["HOME"]
@@ -141,6 +142,8 @@ class OneLiner:
         elif self.args.mode in OneLiner.modes["delete"]:
             self._handle_args_required(name_required=True)
             self._handle_delete()
+        elif self.args.mode in OneLiner.modes["sync"]:
+            self._handle_sync()
         else:
             self.parser.error("Invalid mode")
 
@@ -252,6 +255,34 @@ class OneLiner:
                 if not line_to_delete:
                     file.write(line)
             file.truncate()
+
+    def _handle_sync(self):
+        unencrypted_payload = ""
+        with open(OneLiner.one_liner_alias_file, 'r', encoding='utf-8') as file:
+            start_saving = False
+            for line in file.readlines():
+                if line.startswith("#"*10 + " sync below " + "#"*10):
+                    start_saving = True
+
+                if start_saving:
+                    unencrypted_payload += line
+        unencrypted_payload = unencrypted_payload.encode("utf-8")
+        print(unencrypted_payload, end="\n\n")
+
+        # encryption
+        import secrets
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+        # Generate a random secret key (AES256 needs 32 bytes)
+        key = secrets.token_bytes(32)
+
+        # Encrypt a message
+        nonce = secrets.token_bytes(12)  # GCM mode needs 12 fresh bytes every time
+        ciphertext = nonce + AESGCM(key).encrypt(nonce, base64.b64encode(unencrypted_payload), b"")
+        print(ciphertext, end="\n\n")
+        # Decrypt (raises InvalidTag if using wrong key or corrupted ciphertext)
+        decrypted_payload = AESGCM(key).decrypt(ciphertext[:12], ciphertext[12:], b"")
+        print(base64.b64decode(decrypted_payload), end="\n\n")
 
     @staticmethod
     def _source():
