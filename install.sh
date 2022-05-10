@@ -1,23 +1,21 @@
 #! /bin/bash
 
+echo "#######################"
 echo "Setting up one-liner..."
 
 ONELINER_TEMPLATE="https://raw.githubusercontent.com/GodOfKebab/one-liner/master/.one-liner"
 ONELINER_PYTHON_URL="https://raw.githubusercontent.com/GodOfKebab/one-liner/master/one-liner.py"
 
-curl -Ls $ONELINER_TEMPLATE -o ~/.one-liner
-. "$HOME/.one-liner"
-ONELINER_FILE_CONTENTS=$(curl -Ls $ONELINER_PYTHON_URL)
-curl -Ls $ONELINER_PYTHON_URL | python3 - init --init_file_contents "$ONELINER_FILE_CONTENTS"
+# PARAMETERS START
+ONELINER_PATH="$HOME/.one-liner"
+#ONELINER_PATH="$(pwd)/.one-liner" # DEBUG
+export ONELINER_PATH
 
-if [ $SHELL = "/bin/bash" ]; then
-	echo "detected bash"
-	echo "source ~/.one-liner" >> ~/.bashrc
-elif [ $SHELL = "/bin/zsh" ]; then
-	echo "detected zsh"
-	echo "source ~/.one-liner" >> ~/.zshrc
-fi
+ONELINER_PYTHON_EXEC="python3"
+export ONELINER_PYTHON_EXEC
+# PARAMETERS END
 
-. "$HOME/.one-liner"
-echo "All set. You can start using one-liner after sourcing."
+curl -Ls $ONELINER_TEMPLATE -o "$ONELINER_PATH"
+curl -Ls $ONELINER_PYTHON_URL | python3 - init --init_file_contents "$(curl -Ls $ONELINER_PYTHON_URL)"
+#python3 "$(dirname "$0")/one-liner.py" init --init_file_contents "$(cat "$(dirname "$0")/one-liner.py")" # DEBUG
 

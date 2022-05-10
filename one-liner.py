@@ -4,8 +4,6 @@ import base64
 import argparse
 import os
 import re
-import parser
-from os import path
 
 
 class OneLiner:
@@ -65,20 +63,45 @@ class OneLiner:
 
     def init(self):
         print("Initializing...")
+        self._handle_args_required(init_contents_required=True)
 
         one_liner_name = "one-liner"
         byte_array = self.args.init_file_contents.encode('utf-8')
-        one_liner = "alias {}='{} -c \"import base64; decoded_string = base64.b64decode(b'\"'\"'{}'\"'\"').decode(); exec(decoded_string)\"'".format(one_liner_name, OneLiner.one_liner_python_exec, base64.b64encode(byte_array).decode("utf-8"))
+        one_liner = "alias {}='{} -c \"import base64; decoded_string = base64.b64decode(b'\"'\"'{}'\"'\"').decode(); " \
+                    "exec(decoded_string)\"'".format(one_liner_name, OneLiner.one_liner_python_exec,
+                                                     base64.b64encode(byte_array).decode("utf-8"))
 
         if self.args.verbose:
             print(one_liner)
 
+        # add the one-liner.py as a one-liner
         with open(OneLiner.one_liner_alias_file, 'a+', encoding='utf-8') as file:
             file.write("\n" + one_liner + "\n")
 
+        # add the "source $HOME/.one-liner" to the .bashrc/.zshrc
+        home = os.environ["HOME"]
+        if os.environ["SHELL"] == "/bin/bash":
+            rc_file = home + "/.bashrc"
+        elif os.environ["SHELL"] == "/bin/zsh":
+            rc_file = home + "/.zshrc"
+        else:
+            raise Exception("Unsupported shell! Supported shells are: bash and zsh")
+
+        # check for existing "source $HOME/.one-liner"
+        source_exists = False
+        with open(rc_file, 'r', encoding='utf-8') as file:
+            for line in file.readlines():
+                if re.search("^(\s*|)source (\s*|)" + OneLiner.one_liner_alias_file, line):
+                    source_exists = True
+
+        if not source_exists:
+            with open(rc_file, 'a', encoding='utf-8') as file:
+                file.write("\nsource {}".format(OneLiner.one_liner_alias_file))
+
+        print("All set. You can start using one-liner after sourcing.")
         OneLiner._source()
 
-    def _handle_args_required(self, name_required=False, name_and_filepath_required=False):
+    def _handle_args_required(self, name_required=False, name_and_filepath_required=False, init_contents_required=False):
         if name_and_filepath_required:
             if (not self.args.name) and self.args.filepath:
                 self.parser.error("one-liner name is required for this mode! Specify it by --name [-n]")
@@ -93,6 +116,10 @@ class OneLiner:
         if name_required:
             if not self.args.name:
                 self.parser.error("one-liner name is required for this mode! Specify it by --name [-n]")
+
+        if init_contents_required:
+            if not self.args.init_file_contents:
+                self.parser.error("one-liner.py contents is required for this mode! Specify it by --init_file_contents")
 
     def handle(self):
         if self.args.mode in OneLiner.modes["init"]:
