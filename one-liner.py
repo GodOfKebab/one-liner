@@ -285,6 +285,32 @@ class OneLiner:
     def _handle_sync(self, oneLinerDB):
         self.logger.warning("This feature isn't implemented yet.")
 
+        from cryptography.fernet import Fernet
+
+        one_liners = sorted(oneLinerDB.keys())
+        one_liners.remove("one-liner")
+        one_liners.remove("info_and_params")
+        byte_code = b""
+        for one_liner in one_liners:
+            for part in [oneLinerDB[one_liner]["comments"][0],
+                         oneLinerDB[one_liner]["entire_line"],
+                         oneLinerDB[one_liner]["comments"][1]]:
+                byte_code += (part + "\n").encode("utf-8")
+        if self.verbose:
+            print(byte_code, end="\n\n")
+        byte_code = zlib.compress(byte_code, 9)
+
+        key = Fernet.generate_key()
+        f = Fernet(key)
+        ciphertext = f.encrypt(byte_code)
+        if self.verbose:
+            print("The size of the ciphertext is {} KB".format(len(ciphertext) / 1024.))
+            print(ciphertext, end="\n\n")
+        decrypted_msg = f.decrypt(ciphertext)
+        decrypted_msg = zlib.decompress(decrypted_msg)
+        if self.verbose:
+            print(decrypted_msg, end="\n\n")
+
     def _source(self):
         print("\nExecute the following in shell for changes to take effect:")
         print("\tsource {}\n".format(self.one_liner_alias_file))
