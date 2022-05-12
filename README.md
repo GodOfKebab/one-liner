@@ -43,18 +43,18 @@ Below are the aliases to each of the modes
 
 Example usages:
 ```
-$ oneliner cr --filepath src/welcome_god_of_kebab.py --name greet_the_god
+$ one-liner cr --filepath src/welcome_god_of_kebab.py --name greet_the_god
   
   Execute the following in shell for changes to take effect:
       source .../one-liner/src/.one-liner
 
-$ oneliner ls
+$ one-liner ls
   greet_the_god
-$ oneliner echo -n greet_the_god
+$ one-liner echo -n greet_the_god
 
-    alias greet_the_god='python3 -c "import base64; decoded_string = base64.b64decode(b'"'"'ZnJvbSBhcnQgaW1wb3J0ICoKZnJvbSB0aW1lIGltcG9ydCBzbGVlcAp0ZXh0ID0gdGV4dDJhcnQoJ1dlbGNvbWUsIFxuR29kICBPZiAgS2ViYWIgIDopJykKCmZvciBsaW5lIGluIHRleHQuc3BsaXQoJ1xuJyk6CiAgICBwcmludChsaW5lKQogICAgc2xlZXAoMC4wNSkKCgoK'"'"').decode(); exec(decoded_string)"'
+      alias greet='python3 -c "import base64; import zlib; decoded_string = zlib.decompress(base64.b64decode(b'"'"'eNo1TbsKAjEQ7PcrpktW5DgEmwNrCwtLm2vudAMLeZFL4eebBJxmmGEerqSArVRoyKnRiVx3qgb5W4cXyVTlW3FDp0vLW/MS/05BzljjPX2ApwMesm87sLBhIpcKvMa2E0dtOrLXVlyj4YXQkIvGanuGhx5Pdp7mK9MPXEIv4Q=='"'"')).decode(); exec(decoded_string)"'
 
-$ oneliner cat -n greet_the_god
+$ one-liner cat -n greet_the_god
   WARNING: filepath is not specified, dumping to the terminal
   **************************************************
   from art import *
@@ -66,11 +66,11 @@ $ oneliner cat -n greet_the_god
       sleep(0.05)
 
   **************************************************
-$ oneliner rm -n greet_the_god
-$ oneliner ls
+$ one-liner rm -n greet_the_god
+$ one-liner ls
 ```
 
-Currently the tool works stable, however, for rename mode to work, semi-major upgrade is needed. This is why the latest release is <1.0.
+Currently, the tool works stable, however, for rename mode to work, semi-major upgrade is needed. This is why the latest release is <1.0.
 
 Features tracker:
 
