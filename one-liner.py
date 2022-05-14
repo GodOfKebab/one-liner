@@ -57,13 +57,13 @@ class OneLiner:
             mode_specific_parser.add_argument('name', type=str, default="",
                                               nargs=nargs,
                                               help='alias name for the one-line. If rename mode, first name is the old'
-                                                   'and the second name is the new name.')
+                                                   ' and the second name is the new name.')
         # modes that require/hold-it-optional one-liner filepath
         modes_name = ["create", "override", "dump"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
             mode_specific_parser.add_argument('filepath', type=str, default="",
                                               nargs="?" if self.args.mode in self.modes["dump"] else None,
-                                              help='path for the python file to be converted to one-liner')
+                                              help='path for the python script to be converted to one-liner')
         # modes that require verb (pull/push)
         modes_name = ["sync"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
