@@ -13,7 +13,7 @@ This is the tool I use for creating one-liner python executables.
     
     override: parse and replace one-liner
     
-    rename[N]:parse and rename one-liner
+    rename:   parse and rename one-liner
     
     print:    parse and print one-liner
     
@@ -52,7 +52,7 @@ Below is the arguments that each mode requires/makes it optional
     override: required: name file
               optional: - 
     
-    rename[N]:required: name name
+    rename:   required: name name
               optional: -
     
     print:    required: name
