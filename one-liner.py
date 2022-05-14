@@ -9,6 +9,9 @@ import zlib
 
 
 class OneLiner:
+    class Args(argparse.Namespace):
+        mode = name = filepath = script = verb = ""
+
     def __init__(self):
         self.modes = {"init": ["init"],
                       "create": ["create", "cr", "touch"],
@@ -31,38 +34,55 @@ class OneLiner:
         ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         self.logger.addHandler(ch)
 
-        self.parser = argparse.ArgumentParser(
-            description='Make or read one-liner python executable commands without relying on that script file.')
-        self.parser.add_argument('mode',
-                                 type=str,
-                                 choices=[mode_cli for mode in self.modes for mode_cli in self.modes[mode]],
-                                 help=self.create_mode_help_text(),
-                                 metavar='mode')
-        self.parser.add_argument('-n', '--name',
-                                 type=str,
-                                 default="",
-                                 help='alias name for the one-liner')
-        self.parser.add_argument('-f', '--filepath',
-                                 type=str,
-                                 help='path for the python file to be converted to one-liner')
-        self.parser.add_argument("-v", "--verbose",
-                                 help="enable debug printing",
-                                 action="store_true")
-        self.parser.add_argument('--script',
-                                 type=str,
-                                 default="",
-                                 help='code for the one-liner as a string')
-        self.args = None
+        self.mode_parser = argparse.ArgumentParser(add_help=False,
+                                                   description='Make or read one-liner python executable commands '
+                                                               'without relying on that script file.')
+        self.mode_parser.add_argument('mode', type=str, metavar='mode',
+                                      choices=[mode_cli for mode in self.modes for mode_cli in self.modes[mode]],
+                                      help=self.create_mode_help_text())
+        self.mode_parser.add_argument("-v", "--verbose", default=False, action="store_true",
+                                      help="enable debug printing")
+        self.args = OneLiner.Args()
         self.verbose = False
 
     def parse_cli(self):
-        self.args = self.parser.parse_args()
+        self.mode_parser.parse_known_args(namespace=self.args)
+
+        mode_specific_parser = argparse.ArgumentParser(parents=[self.mode_parser])
+        # modes that require/hold-it-optional one-liner name
+        modes_name = ["create", "override", "rename", "print", "dump", "delete"]
+        if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
+            nargs = "?" if self.args.mode in self.modes["create"] else None
+            nargs = 2 if self.args.mode in self.modes["rename"] else nargs
+            mode_specific_parser.add_argument('name', type=str, default="",
+                                              nargs=nargs,
+                                              help='alias name for the one-line. If rename mode, first name is the old'
+                                                   'and the second name is the new name.')
+        # modes that require/hold-it-optional one-liner filepath
+        modes_name = ["create", "override", "dump"]
+        if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
+            mode_specific_parser.add_argument('filepath', type=str, default="",
+                                              nargs="?" if self.args.mode in self.modes["dump"] else None,
+                                              help='path for the python file to be converted to one-liner')
+        # modes that require verb (pull/push)
+        modes_name = ["sync"]
+        if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
+            mode_specific_parser.add_argument('verb', type=str, choices=["pull", "push"],
+                                              nargs="?",
+                                              help='if left empty, the program if upload if the last upload was made '
+                                                   'from this computer. To override this, specify verb (pull/push)')
+        # modes that require script
+        modes_name = ["init"]
+        if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
+            mode_specific_parser.add_argument('script', type=str, help='code for the one-liner as a string')
+        mode_specific_parser.parse_args(namespace=self.args)
+
         if self.args.verbose:
             self.verbose = True
             self.logger.setLevel(logging.DEBUG)
 
     def create_mode_help_text(self):
-        mode_help_text = "select mode: "
+        mode_help_text = ""
         for mode in self.modes:
             for i, mode_cli in enumerate(self.modes[mode]):
                 if i == 0:
@@ -74,22 +94,7 @@ class OneLiner:
                     mode_help_text += mode_cli + ", "
                 else:
                     mode_help_text += mode_cli + "], "
-        return mode_help_text
-
-    def _args_req(self, name=False, name_filepath=False, script_required=False):
-        msg = "one-liner {} required for this mode! Specify it by {}"
-        if name_filepath and not (self.args.name or self.args.filepath):
-            msg = msg.format("name and filepath are", "--name [-n] and --filepath [-f]")
-        if name_filepath and ((not self.args.filepath) and self.args.name):
-            msg = msg.format("filepath is", "--filepath [-f]")
-        if (name or (name_filepath and self.args.filepath)) and not self.args.name:
-            msg = msg.format("name is", "--name [-n]")
-        if script_required and not self.args.script:
-            msg = msg.format("script contents are", "--script")
-
-        if msg != "one-liner {} required for this mode! Specify it by {}":
-            self.logger.error(msg)
-            exit(-1)
+        return mode_help_text.rstrip(" ").rstrip(",")
 
     def handle(self):
         self.parse_cli()
@@ -97,34 +102,27 @@ class OneLiner:
 
         if self.args.mode in self.modes["init"]:
             print("Initializing...")
-            self._args_req(script_required=True)
             self._handle_init(oneLinerDB, self.args.script)
         elif self.args.mode in self.modes["print"]:
-            self._args_req(name=True)
             self._handle_print(oneLinerDB, self.args.name)
         elif self.args.mode in self.modes["create"]:
-            self._args_req(name=True)
             self._handle_create_override(oneLinerDB, self.args.name, self.args.filepath)
         elif self.args.mode in self.modes["override"]:
-            self._args_req(name_filepath=True)
-            self._handle_create_override(oneLinerDB, self.args.name, self.args.filepath, True)
+            self._handle_create_override(oneLinerDB, self.args.name, self.args.filepath, override=True)
         elif self.args.mode in self.modes["rename"]:
-            self._args_req(name=True)
-            self._handle_rename(oneLinerDB, self.args.name)
+            self._handle_rename(oneLinerDB, self.args.name[0], self.args.name[1])
         elif self.args.mode in self.modes["dump"]:
-            self._args_req(name=True)
             self._handle_export(oneLinerDB, self.args.name, self.args.filepath)
         elif self.args.mode in self.modes["list"]:
             self._handle_list(oneLinerDB)
         elif self.args.mode in self.modes["delete"]:
-            self._args_req(name=True)
             self._handle_delete(oneLinerDB, self.args.name)
         elif self.args.mode in self.modes["fix"]:
             self.construct_doc(oneLinerDB)
         elif self.args.mode in self.modes["sync"]:
-            self._handle_sync(oneLinerDB)
+            self._handle_sync(oneLinerDB, self.args.verb)
         else:
-            self.parser.error("Invalid mode")
+            self.mode_parser.error("Unsupported mode")
 
     def parse_doc(self):
         oneLinerDB = {"info_and_params": {"contents": ""}}
@@ -215,13 +213,9 @@ class OneLiner:
             self.logger.error("This one-liner doesn't exist!")
 
     def _handle_create_override(self, oneLinerDB, name, filepath, override=False, init=False):
-        one_liner_name = name if name != "" else filepath.rstrip(".py")
+        one_liner_name = name if name != "" else filepath.rstrip(".py").split("/")[-1]
 
-        if init:
-            byte_array = filepath
-        else:
-            with open(filepath, encoding='utf-8') as file:
-                byte_array = file.read().encode('utf-8')
+        byte_array = filepath if init else open(filepath, encoding='utf-8').read().encode('utf-8')
 
         base64_zlib_result = base64.b64encode(zlib.compress(byte_array, 9)).decode("utf-8")
         one_liner = "alias {}='{} -c \"import base64; import zlib; decoded_string = zlib.decompress(base64.b64decode(" \
@@ -231,11 +225,9 @@ class OneLiner:
 
         if (one_liner_name not in oneLinerDB.keys() and not override) or \
                 (one_liner_name in oneLinerDB.keys() and override):
-            if init:
-                oneLinerDB[one_liner_name] = {"entire_line": one_liner,
-                                              "comments": ['', "#" * 10 + " sync below " + "#" * 10]}
-            else:
-                oneLinerDB[one_liner_name] = {"entire_line": one_liner, "comments": ['', '']}
+            oneLinerDB[one_liner_name] = {"entire_line": one_liner,
+                                          "comments": ['',
+                                                       "{} sync below {}".format("#" * 10, "#" * 10) if init else '']}
             self.construct_doc(oneLinerDB)
             self._source()
         else:
@@ -246,26 +238,26 @@ class OneLiner:
                 msg = msg.format("does not  exist", "create", "create", self.modes["create"])
             self.logger.error(msg)
 
-    def _handle_rename(self, oneLinerDB, name):
+    def _handle_rename(self, oneLinerDB, old_name, new_name):
         try:
-            self.logger.error("This feature isn't implemented yet!")
-            # popped = oneLinerDB.pop(name)
-            # new_name = name # TODO: add option for the second name
-            # oneLinerDB[new_name] = popped
-            # OneLiner.construct_doc(oneLinerDB)
+            popped = oneLinerDB.pop(old_name)
+            popped['entire_line'] = "alias " + new_name + \
+                                    popped['entire_line'].lstrip(" ").lstrip("alias").lstrip(" ").lstrip(old_name)
+            oneLinerDB[new_name] = popped
+            self.construct_doc(oneLinerDB)
         except KeyError:
             self.logger.error("This one-liner doesn't exist!")
 
     def _handle_export(self, oneLinerDB, name, filepath):
         try:
             base64_code = re.search("'\"'\"'.*'\"'\"'", oneLinerDB[name]["entire_line"]).group().strip("'\"'\"'")
-            if not filepath:
-                self.logger.warning("filepath is not specified, dumping to the terminal")
-                print("{}\n{}\n{}".format("*" * 50, zlib.decompress(base64.b64decode(base64_code)).decode(), "*" * 50))
-            else:
+            if filepath:
                 print("filepath is specified, saving to that file")
                 with open(filepath, 'x', encoding='utf-8') as new_file:
                     new_file.write(zlib.decompress(base64.b64decode(base64_code)).decode())
+            else:
+                self.logger.warning("filepath is not specified, dumping to the terminal")
+                print("{}\n{}\n{}".format("*" * 50, zlib.decompress(base64.b64decode(base64_code)).decode(), "*" * 50))
         except KeyError:
             self.logger.error("This one-liner doesn't exist!")
         except FileExistsError:
@@ -282,7 +274,7 @@ class OneLiner:
         except KeyError:
             self.logger.error("This one-liner doesn't exist!")
 
-    def _handle_sync(self, oneLinerDB):
+    def _handle_sync(self, oneLinerDB, verb):
         self.logger.warning("This feature isn't implemented yet.")
 
         from cryptography.fernet import Fernet
@@ -318,5 +310,5 @@ class OneLiner:
 
 if __name__ == "__main__":
     oneLiner = OneLiner()
+    # oneLiner.parse_cli()
     oneLiner.handle()
-

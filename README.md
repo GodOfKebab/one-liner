@@ -1,11 +1,11 @@
 # one-liner
 This is the tool I use for creating one-liner python executables.
 
-Installation:
+##Installation:
 
 ```curl -Ls https://raw.githubusercontent.com/GodOfKebab/one-liner/master/install.sh | bash```
 
-Features:
+##Features:
 
     init:     parse and add one-liner one-liner
     
@@ -41,7 +41,40 @@ Below are the aliases to each of the modes
              "fix": ["fix", "format"],
              "sync": ["sync"]}
 
-Example usages:
+Below is the arguments that each mode requires/makes it optional
+
+    init:     required: script
+              optional: - 
+    
+    create:   required: file
+              optional: name
+    
+    override: required: name file
+              optional: - 
+    
+    rename[N]:required: name name
+              optional: -
+    
+    print:    required: name
+              optional: -
+    
+    dump:     required: name
+              optional: file
+    
+    list:     required: -
+              optional: -
+    
+    delete:   required: name
+              optional: -
+    
+    fix:      required: -
+              optional: -
+    
+    sync[N]:  required: -
+              optional: pull/push
+
+
+##Example usages:
 ```
 $ oneliner cr --filepath src/welcome_god_of_kebab.py --name greet_the_god
   
@@ -70,11 +103,15 @@ $ oneliner rm -n greet_the_god
 $ oneliner ls
 ```
 
-Currently the tool works stable, however, for rename mode to work, semi-major upgrade is needed. This is why the latest release is <1.0.
+##Developer's Guide
 
-Features tracker:
+- Using the below command to create the one-liner alias will come in handy:
+        
+        $ python3 one-liner.py init  "$(cat one-liner.py)" 
 
-* rename mode
+##Features backlog:
+
+* proper logging
 * are you sure? prompt
 * add install.sh arguments so that DX is better
 * add test codes to automate testing going forward
