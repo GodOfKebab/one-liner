@@ -1,11 +1,11 @@
 # one-liner
 This is the tool I use for creating one-liner python executables.
 
-Installation:
+##Installation:
 
 ```curl -Ls https://raw.githubusercontent.com/GodOfKebab/one-liner/master/install.sh | bash```
 
-Features:
+##Features:
 
     init:     parse and add one-liner one-liner
     
@@ -41,20 +41,53 @@ Below are the aliases to each of the modes
              "fix": ["fix", "format"],
              "sync": ["sync"]}
 
-Example usages:
+Below is the arguments that each mode requires/makes it optional
+
+    init:     required: script
+              optional: - 
+    
+    create:   required: file
+              optional: name
+    
+    override: required: name file
+              optional: - 
+    
+    rename[N]:required: name name
+              optional: -
+    
+    print:    required: name
+              optional: -
+    
+    dump:     required: name
+              optional: file
+    
+    list:     required: -
+              optional: -
+    
+    delete:   required: name
+              optional: -
+    
+    fix:      required: -
+              optional: -
+    
+    sync[N]:  required: -
+              optional: pull/push
+
+
+##Example usages:
 ```
-$ one-liner cr --filepath src/welcome_god_of_kebab.py --name greet_the_god
+$ oneliner cr --filepath src/welcome_god_of_kebab.py --name greet_the_god
   
   Execute the following in shell for changes to take effect:
       source .../one-liner/src/.one-liner
 
-$ one-liner ls
+$ oneliner ls
   greet_the_god
-$ one-liner echo -n greet_the_god
+$ oneliner echo -n greet_the_god
 
-      alias greet='python3 -c "import base64; import zlib; decoded_string = zlib.decompress(base64.b64decode(b'"'"'eNo1TbsKAjEQ7PcrpktW5DgEmwNrCwtLm2vudAMLeZFL4eebBJxmmGEerqSArVRoyKnRiVx3qgb5W4cXyVTlW3FDp0vLW/MS/05BzljjPX2ApwMesm87sLBhIpcKvMa2E0dtOrLXVlyj4YXQkIvGanuGhx5Pdp7mK9MPXEIv4Q=='"'"')).decode(); exec(decoded_string)"'
+    alias greet_the_god='python3 -c "import base64; decoded_string = base64.b64decode(b'"'"'ZnJvbSBhcnQgaW1wb3J0ICoKZnJvbSB0aW1lIGltcG9ydCBzbGVlcAp0ZXh0ID0gdGV4dDJhcnQoJ1dlbGNvbWUsIFxuR29kICBPZiAgS2ViYWIgIDopJykKCmZvciBsaW5lIGluIHRleHQuc3BsaXQoJ1xuJyk6CiAgICBwcmludChsaW5lKQogICAgc2xlZXAoMC4wNSkKCgoK'"'"').decode(); exec(decoded_string)"'
 
-$ one-liner cat -n greet_the_god
+$ oneliner cat -n greet_the_god
   WARNING: filepath is not specified, dumping to the terminal
   **************************************************
   from art import *
@@ -66,15 +99,19 @@ $ one-liner cat -n greet_the_god
       sleep(0.05)
 
   **************************************************
-$ one-liner rm -n greet_the_god
-$ one-liner ls
+$ oneliner rm -n greet_the_god
+$ oneliner ls
 ```
 
-Currently, the tool works stable, however, for rename mode to work, semi-major upgrade is needed. This is why the latest release is <1.0.
+##Developer's Guide
 
-Features tracker:
+- Using the below command to create the one-liner alias will come in handy:
+        
+        $ python3 one-liner.py init  "$(cat one-liner.py)" 
 
-* rename mode
+##Features backlog:
+
+* proper logging
 * are you sure? prompt
 * add install.sh arguments so that DX is better
 * add test codes to automate testing going forward
