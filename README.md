@@ -53,7 +53,7 @@ help flag like so:
       greet_the_god
     $ one-liner echo greet_the_god
     
-        alias greet_the_god='python3 -c "import base64; decoded_string = base64.b64decode(b'"'"'ZnJvbSBhcnQgaW1wb3J0ICoKZnJvbSB0aW1lIGltcG9ydCBzbGVlcAp0ZXh0ID0gdGV4dDJhcnQoJ1dlbGNvbWUsIFxuR29kICBPZiAgS2ViYWIgIDopJykKCmZvciBsaW5lIGluIHRleHQuc3BsaXQoJ1xuJyk6CiAgICBwcmludChsaW5lKQogICAgc2xlZXAoMC4wNSkKCgoK'"'"').decode(); exec(decoded_string)"'
+        alias welcome_god_of_kebab='python3 -c "import base64; import zlib; decoded_string = zlib.decompress(base64.b64decode(b'"'"'eNo1TbsKAjEQ7PcrpktW5DgEmwNrCwtLm2vudAMLeZFL4eebBJxmmGEerqSArVRoyKnRiVx3qgb5W4cXyVTlW3FDp0vLW/MS/05BzljjPX2ApwMesm87sLBhIpcKvMa2E0dtOrLXVlyj4YXQkIvGanuGhx5Pdp7mK9MPXEIv4Q=='"'"')).decode(); exec(decoded_string)"'    
     
     $ one-liner cat greet_the_god
       WARNING: filepath is not specified, dumping to the terminal
