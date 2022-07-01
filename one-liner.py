@@ -224,7 +224,8 @@ class OneLiner:
                                                                                    base64_zlib_result)
 
         if (one_liner_name not in oneLinerDB.keys() and not override) or \
-                (one_liner_name in oneLinerDB.keys() and override):
+                (one_liner_name in oneLinerDB.keys() and override) or \
+                init:
             oneLinerDB[one_liner_name] = {"entire_line": one_liner,
                                           "comments": ['',
                                                        "{} sync below {}".format("#" * 10, "#" * 10) if init else '']}
@@ -310,5 +311,4 @@ class OneLiner:
 
 if __name__ == "__main__":
     oneLiner = OneLiner()
-    # oneLiner.parse_cli()
     oneLiner.handle()
