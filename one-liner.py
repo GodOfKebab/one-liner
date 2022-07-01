@@ -39,7 +39,8 @@ class OneLiner:
         # Check to see if the only argument is the -h or --help
         self.mode_parser = argparse.ArgumentParser(add_help=sys.argv[1:] in [['-h'], ['--help']],
                                                    description='Make or read one-liner python executable commands '
-                                                               'without relying on that script file.')
+                                                               'without relying on that script file.',
+                                                   usage="one-liner [-h] [-v] mode [mode-specific-required-args]...")
         self.mode_parser.add_argument('mode', type=str, metavar='mode',
                                       choices=[mode_cli for mode in self.modes for mode_cli in self.modes[mode]],
                                       help=self.create_mode_help_text())
@@ -77,6 +78,10 @@ class OneLiner:
         modes_name = ["init"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
             mode_specific_parser.add_argument('script', type=str, help='code for the one-liner as a string')
+
+        mode_specific_parser.usage = mode_specific_parser.format_usage().\
+            replace('mode', self.args.mode).\
+            replace('usage: -c', 'one-liner')
         mode_specific_parser.parse_args(namespace=self.args)
 
         if self.args.verbose:
