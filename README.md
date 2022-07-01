@@ -131,9 +131,8 @@ help flag like so:
 
 It is highly recommended that you install the tool using the
 dev-recommended way. Then, to test your changes, simply run the
-following commands to override the one-liner alias.
+following command to override the one-liner alias.
 
-    $ one-liner rm one-liner
     $ python3 one-liner.py init "$(cat one-liner.py)"
 
 ## TODO List:
