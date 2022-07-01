@@ -2,6 +2,7 @@
 
 import base64
 import argparse
+import sys
 import os
 import re
 import logging
@@ -11,6 +12,7 @@ import zlib
 class OneLiner:
     class Args(argparse.Namespace):
         mode = name = filepath = script = verb = ""
+        verbose = False
 
     def __init__(self):
         self.modes = {"init": ["init"],
@@ -34,7 +36,8 @@ class OneLiner:
         ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         self.logger.addHandler(ch)
 
-        self.mode_parser = argparse.ArgumentParser(add_help=False,
+        # Check to see if the only argument is the -h or --help
+        self.mode_parser = argparse.ArgumentParser(add_help=sys.argv[1:] in [['-h'], ['--help']],
                                                    description='Make or read one-liner python executable commands '
                                                                'without relying on that script file.')
         self.mode_parser.add_argument('mode', type=str, metavar='mode',
@@ -43,7 +46,6 @@ class OneLiner:
         self.mode_parser.add_argument("-v", "--verbose", default=False, action="store_true",
                                       help="enable debug printing")
         self.args = OneLiner.Args()
-        self.verbose = False
 
     def parse_cli(self):
         self.mode_parser.parse_known_args(namespace=self.args)
@@ -78,7 +80,6 @@ class OneLiner:
         mode_specific_parser.parse_args(namespace=self.args)
 
         if self.args.verbose:
-            self.verbose = True
             self.logger.setLevel(logging.DEBUG)
 
     def create_mode_help_text(self):
@@ -289,19 +290,19 @@ class OneLiner:
                          oneLinerDB[one_liner]["entire_line"],
                          oneLinerDB[one_liner]["comments"][1]]:
                 byte_code += (part + "\n").encode("utf-8")
-        if self.verbose:
+        if self.args.verbose:
             print(byte_code, end="\n\n")
         byte_code = zlib.compress(byte_code, 9)
 
         key = Fernet.generate_key()
         f = Fernet(key)
         ciphertext = f.encrypt(byte_code)
-        if self.verbose:
+        if self.args.verbose:
             print("The size of the ciphertext is {} KB".format(len(ciphertext) / 1024.))
             print(ciphertext, end="\n\n")
         decrypted_msg = f.decrypt(ciphertext)
         decrypted_msg = zlib.decompress(decrypted_msg)
-        if self.verbose:
+        if self.args.verbose:
             print(decrypted_msg, end="\n\n")
 
     def _source(self):
