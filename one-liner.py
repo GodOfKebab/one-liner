@@ -38,8 +38,8 @@ class OneLiner:
 
         # Check to see if the only argument is the -h or --help
         self.mode_parser = argparse.ArgumentParser(add_help=sys.argv[1:] in [['-h'], ['--help']],
-                                                   description='Make or read one-liner python executable commands '
-                                                               'without relying on that script file.',
+                                                   description='Manage one-liner python executable commands '
+                                                               'without relying on the original script file.',
                                                    usage="one-liner [-h] [-v] mode [mode-specific-required-args]...")
         self.mode_parser.add_argument('mode', type=str, metavar='mode',
                                       choices=[mode_cli for mode in self.modes for mode_cli in self.modes[mode]],
@@ -66,13 +66,14 @@ class OneLiner:
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
             mode_specific_parser.add_argument('filepath', type=str, default="",
                                               nargs="?" if self.args.mode in self.modes["dump"] else None,
-                                              help='path for the python script to be converted to one-liner')
+                                              help='file path for the python script to be converted to/from one-liner')
         # modes that require verb (pull/push)
         modes_name = ["sync"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
             mode_specific_parser.add_argument('verb', type=str, choices=["pull", "push"],
                                               nargs="?",
-                                              help='if left empty, the program if upload if the last upload was made '
+                                              help='[CURRENTLY NOT IMPLEMENTED] '
+                                                   'if left empty, the program if upload if the last upload was made '
                                                    'from this computer. To override this, specify verb (pull/push)')
         # modes that require script
         modes_name = ["init"]
