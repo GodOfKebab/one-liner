@@ -15,7 +15,11 @@ ONELINER_PYTHON_EXEC="python3"
 export ONELINER_PYTHON_EXEC
 # PARAMETERS END
 
-curl -Ls $ONELINER_TEMPLATE -o "$ONELINER_PATH"
+# Check to see if there exists an existing installation of the one-liner tool
+if [ ! -f "$ONELINER_PATH" ]; then
+    curl -Ls $ONELINER_TEMPLATE -o "$ONELINER_PATH"
+fi
+
 curl -Ls $ONELINER_PYTHON_URL | python3 - init "$(curl -Ls $ONELINER_PYTHON_URL)"
-#python3 "$(dirname "$0")/one-liner.py" init --init_script "$(cat "$(dirname "$0")/one-liner.py")" # DEBUG
+#python3 "$(dirname "$0")/one-liner.py" init "$(cat "$(dirname "$0")/one-liner.py")" # DEBUG
 
