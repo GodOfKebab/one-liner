@@ -51,8 +51,10 @@ class OneLiner:
         ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         self.logger.addHandler(ch)
 
+        help_only = sys.argv[1:] in [['-h'], ['--help']]
+
         # Check to see if the only argument is the -h or --help
-        self.mode_parser = argparse.ArgumentParser(add_help=sys.argv[1:] in [['-h'], ['--help']],
+        self.mode_parser = argparse.ArgumentParser(add_help=help_only,
                                                    description='Manage one-liner python executable commands '
                                                                'without relying on the original script file.'
                                                                'To view the required arg(s) for each of the modes, '
@@ -62,7 +64,7 @@ class OneLiner:
                                                    formatter_class=argparse.RawTextHelpFormatter)
         self.mode_parser.add_argument('mode', type=str, metavar='mode',
                                       choices=[mode_cli for mode in self.modes for mode_cli in self.modes[mode]],
-                                      help=self.create_avail_modes_text())
+                                      help=self.modes_help() if help_only else argparse.SUPPRESS)
         self.mode_parser.add_argument("-v", "--verbose", default=False, action="store_true",
                                       help="enable debug printing")
         self.args = OneLiner.Args()
@@ -102,14 +104,13 @@ class OneLiner:
             mode_specific_parser.add_argument('script', type=str, help='code for the one-liner as a string')
 
         mode_specific_parser.usage = mode_specific_parser.format_usage().\
-            replace('mode', self.args.mode).\
-            replace('usage: -c', 'one-liner')
+            replace('usage: -c', 'one-liner ' + self.args.mode)
         mode_specific_parser.parse_args(namespace=self.args)
 
         if self.args.verbose:
             self.logger.setLevel(logging.DEBUG)
 
-    def create_avail_modes_text(self):
+    def modes_help(self):
         mode_help_text = ""
         for mode in self.modes:
             for i, mode_cli in enumerate(self.modes[mode]):
