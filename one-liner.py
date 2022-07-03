@@ -14,7 +14,7 @@ class OneLiner:
         mode = name = filepath = script = verb = ""
         verbose = False
 
-    def __init__(self):
+    def __init__(self, cmd_args):
         self.modes = {
             "init": ["init"],
             "create": ["create", "cr", "touch"],
@@ -51,10 +51,12 @@ class OneLiner:
         ch.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         self.logger.addHandler(ch)
 
-        help_only = sys.argv[1:] in [['-h'], ['--help']]
+        self.cmd_args = cmd_args
+
+        self.help_only = self.cmd_args in [['-h'], ['--help']]
 
         # Check to see if the only argument is the -h or --help
-        self.mode_parser = argparse.ArgumentParser(add_help=help_only,
+        self.mode_parser = argparse.ArgumentParser(add_help=self.help_only,
                                                    description='Manage one-liner python executable commands '
                                                                'without relying on the original script file.'
                                                                'To view the required arg(s) for each of the modes, '
@@ -64,13 +66,19 @@ class OneLiner:
                                                    formatter_class=argparse.RawTextHelpFormatter)
         self.mode_parser.add_argument('mode', type=str, metavar='mode',
                                       choices=[mode_cli for mode in self.modes for mode_cli in self.modes[mode]],
-                                      help=self.modes_help() if help_only else argparse.SUPPRESS)
+                                      help=self.modes_help() if self.help_only else argparse.SUPPRESS)
         self.mode_parser.add_argument("-v", "--verbose", default=False, action="store_true",
                                       help="enable debug printing")
         self.args = OneLiner.Args()
 
     def parse_cli(self):
-        self.mode_parser.parse_known_args(namespace=self.args)
+        try:
+            self.mode_parser.parse_known_args(self.cmd_args, namespace=self.args)
+        except SystemExit as e:
+            if e.code == 2:  # if a parsing error occurs, print help
+                OneLiner(['--help']).parse_cli()
+            if self.help_only or e.code == 2:
+                raise SystemExit
 
         mode_specific_parser = argparse.ArgumentParser(parents=[self.mode_parser],
                                                        description=self.mode_description(),
@@ -103,9 +111,9 @@ class OneLiner:
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
             mode_specific_parser.add_argument('script', type=str, help='code for the one-liner as a string')
 
-        mode_specific_parser.usage = mode_specific_parser.format_usage().\
+        mode_specific_parser.usage = mode_specific_parser.format_usage(). \
             replace('usage: -c', 'one-liner ' + self.args.mode)
-        mode_specific_parser.parse_args(namespace=self.args)
+        mode_specific_parser.parse_args(self.cmd_args, namespace=self.args)
 
         if self.args.verbose:
             self.logger.setLevel(logging.DEBUG)
@@ -342,5 +350,5 @@ class OneLiner:
 
 
 if __name__ == "__main__":
-    oneLiner = OneLiner()
+    oneLiner = OneLiner(sys.argv[1:])
     oneLiner.handle()
