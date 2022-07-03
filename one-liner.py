@@ -40,6 +40,10 @@ class OneLiner:
             "fix": "fix .one-liner file by parsing and construct the .one-liner file again",
             "sync": "encrypt all the one-liners and sync with the one-liner servers (not functional)",
         }
+        # make sure that the aliases are correctly interpreted
+        for mode in list(self.mode_desc_dict.keys()).copy():
+            for mode_alias in self.modes[mode]:
+                self.mode_desc_dict[mode_alias] = self.mode_desc_dict[mode]
 
         self.one_liner_alias_file = os.environ["ONELINER_PATH"]
         self.one_liner_python_exec = os.environ["ONELINER_PYTHON_EXEC"]
