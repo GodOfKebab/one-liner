@@ -16,10 +16,16 @@ export ONELINER_PYTHON_EXEC
 # PARAMETERS END
 
 # Check to see if there exists an existing installation of the one-liner tool
-if [ ! -f "$ONELINER_PATH" ]; then
+if [ -f "$ONELINER_PATH" ]; then
+  read -p "Existing one-liner setup found! Only the one-liner tool will be overridden. Do you want to continue? [y/N] " -r yn
+  case "$(echo -e "$yn" | tr -d '[:space:]')" in
+      [Yy]* ) ;;
+      * ) echo "Aborting..."; exit;;
+  esac
+else
     curl -Ls $ONELINER_TEMPLATE -o "$ONELINER_PATH"
 fi
 
-curl -Ls $ONELINER_PYTHON_URL | python3 - init "$(curl -Ls $ONELINER_PYTHON_URL)"
+curl -Ls $ONELINER_PYTHON_URL | python3 - init "$(curl -Ls $ONELINER_PYTHON_URL)" -y
 #python3 "$(dirname "$0")/one-liner.py" init "$(cat "$(dirname "$0")/one-liner.py")" # DEBUG
 
