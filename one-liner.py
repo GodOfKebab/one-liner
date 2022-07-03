@@ -366,8 +366,12 @@ class OneLiner:
         if self.args.yes:
             return
         # if not replied 'y', abort
-        if input(statement + " Do you want to continue? [y/N] ").strip(" ").lower() != 'y':
-            print("Aborting...")
+        try:
+            if input(statement + " Do you want to continue? [y/N] ").strip(" ").lower() != 'y':
+                print("Aborting...")
+                raise SystemExit
+        except KeyboardInterrupt:
+            print("\nAborting...")
             raise SystemExit
 
 
