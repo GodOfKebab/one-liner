@@ -12,7 +12,7 @@ import zlib
 class OneLiner:
     class Args(argparse.Namespace):
         mode = name = filepath = script = verb = ""
-        verbose = False
+        verbose = yes = False
 
     def __init__(self, cmd_args):
         self.modes = {
@@ -69,6 +69,8 @@ class OneLiner:
                                       help=self.modes_help() if self.help_only else argparse.SUPPRESS)
         self.mode_parser.add_argument("-v", "--verbose", default=False, action="store_true",
                                       help="enable debug printing")
+        self.mode_parser.add_argument("-y", "--yes", default=False, action="store_true",
+                                      help="skip the 'Do you want to continue? [y/N]' prompt")
         self.args = OneLiner.Args()
 
     def parse_cli(self):
@@ -262,22 +264,24 @@ class OneLiner:
                     "b'\"'\"'{}'\"'\"')).decode(); exec(decoded_string)\"'".format(one_liner_name,
                                                                                    self.one_liner_python_exec,
                                                                                    base64_zlib_result)
-
-        if (one_liner_name not in oneLinerDB.keys() and not override) or \
-                (one_liner_name in oneLinerDB.keys() and override) or \
-                init:
-            oneLinerDB[one_liner_name] = {"entire_line": one_liner,
-                                          "comments": ['',
-                                                       "{} sync below {}".format("#" * 10, "#" * 10) if init else '']}
+        # check for the conflicts between the mode selected and the provided args
+        mode_args_no_conflict = ((one_liner_name not in oneLinerDB.keys()) and not override) or \
+                             ((one_liner_name in oneLinerDB.keys()) and (override))
+        # edit the temporary DB object but hold to check mode
+        oneLinerDB[one_liner_name] = {"entire_line": one_liner,
+                                      "comments": ['', "{} sync below {}".format("#" * 10, "#" * 10) if init else '']}
+        if mode_args_no_conflict:
             self.construct_doc(oneLinerDB)
             self._source()
         else:
-            msg = "This one-liner {}. If you want to {}, use the {} mode({})"
-            if not override:
-                msg = msg.format("already exists", "override", "override", self.modes["override"])
+            if init:
+                self._ask_approval("Existing one-liner setup found! Only the one-liner tool will be overridden.")
+            elif override:
+                self._ask_approval("The one-liner '{}' does not exist and a new one will be created.".format(one_liner_name))
             else:
-                msg = msg.format("does not  exist", "create", "create", self.modes["create"])
-            self.logger.error(msg)
+                self._ask_approval("The one-liner '{}' already exists and will be overridden.".format(one_liner_name))
+            self.construct_doc(oneLinerDB)
+            self._source()
 
     def _handle_rename(self, oneLinerDB, old_name, new_name):
         try:
@@ -285,6 +289,7 @@ class OneLiner:
             popped['entire_line'] = "alias " + new_name + \
                                     popped['entire_line'].lstrip(" ").lstrip("alias").lstrip(" ").lstrip(old_name)
             oneLinerDB[new_name] = popped
+            self._ask_approval("You are about to rename a one-liner from '{}' to '{}'.".format(old_name, new_name))
             self.construct_doc(oneLinerDB)
         except KeyError:
             self.logger.error("This one-liner doesn't exist!")
@@ -303,6 +308,10 @@ class OneLiner:
             self.logger.error("This one-liner doesn't exist!")
         except FileExistsError:
             self.logger.error("Override protection: This file already exists!")
+            self._ask_approval("The existing file will be overwritten.")
+            base64_code = re.search("'\"'\"'.*'\"'\"'", oneLinerDB[name]["entire_line"]).group().strip("'\"'\"'")
+            with open(filepath, 'w', encoding='utf-8') as new_file:
+                new_file.write(zlib.decompress(base64.b64decode(base64_code)).decode())
 
     def _handle_list(self, oneLinerDB):
         for one_liner in sorted(oneLinerDB.keys()):
@@ -311,6 +320,7 @@ class OneLiner:
     def _handle_delete(self, oneLinerDB, name):
         try:
             oneLinerDB.pop(name)
+            self._ask_approval("You are about to delete the one-liner: '{}'.".format(name))
             self.construct_doc(oneLinerDB)
         except KeyError:
             self.logger.error("This one-liner doesn't exist!")
@@ -347,6 +357,14 @@ class OneLiner:
     def _source(self):
         print("\nExecute the following in shell for changes to take effect:")
         print("\tsource {}\n".format(self.one_liner_alias_file))
+
+    def _ask_approval(self, statement):
+        if self.args.yes:
+            return
+        # if not replied 'y', abort
+        if input(statement + " Do you want to continue? [y/N] ").strip(" ").lower() != 'y':
+            print("Aborting...")
+            raise SystemExit
 
 
 if __name__ == "__main__":
