@@ -15,16 +15,31 @@ class OneLiner:
         verbose = False
 
     def __init__(self):
-        self.modes = {"init": ["init"],
-                      "create": ["create", "cr", "touch"],
-                      "override": ["override", "ov"],
-                      "rename": ["rename", "mv"],
-                      "print": ["print", "pr", "echo"],
-                      "dump": ["dump", "dmp", "export", "cat"],
-                      "list": ["list", "ls"],
-                      "delete": ["delete", "del", "rm"],
-                      "fix": ["fix", "format"],
-                      "sync": ["sync"]}
+        self.modes = {
+            "init": ["init"],
+            "create": ["create", "cr", "touch"],
+            "override": ["override", "ov"],
+            "rename": ["rename", "mv"],
+            "print": ["print", "pr", "echo"],
+            "dump": ["dump", "dmp", "export", "cat"],
+            "list": ["list", "ls"],
+            "delete": ["delete", "del", "rm"],
+            "fix": ["fix", "format"],
+            "sync": ["sync"]
+        }
+
+        self.mode_desc_dict = {
+            "init": "initialize the .one-liner file",
+            "create": "create and add one-liner",
+            "override": "create and override one-liner",
+            "rename": "rename a one-liner",
+            "print": "print the alias line of one-liner",
+            "dump": "decode the one-liner and dump it either on the shell or to a file",
+            "list": "list the all one-liners",
+            "delete": "remove a one-liner",
+            "fix": "fix .one-liner file by parsing and construct the .one-liner file again",
+            "sync": "encrypt all the one-liners and sync with the one-liner servers (not functional)",
+        }
 
         self.one_liner_alias_file = os.environ["ONELINER_PATH"]
         self.one_liner_python_exec = os.environ["ONELINER_PYTHON_EXEC"]
@@ -39,11 +54,15 @@ class OneLiner:
         # Check to see if the only argument is the -h or --help
         self.mode_parser = argparse.ArgumentParser(add_help=sys.argv[1:] in [['-h'], ['--help']],
                                                    description='Manage one-liner python executable commands '
-                                                               'without relying on the original script file.',
-                                                   usage="one-liner [-h] [-v] mode [mode-specific-required-args]...")
+                                                               'without relying on the original script file.'
+                                                               'To view the required arg(s) for each of the modes, '
+                                                               'add the help flag (-h) to the mode. '
+                                                               'For example, -> one-liner create -h',
+                                                   usage="one-liner [-h] [-v] mode [mode-specific-required-args]...",
+                                                   formatter_class=argparse.RawTextHelpFormatter)
         self.mode_parser.add_argument('mode', type=str, metavar='mode',
                                       choices=[mode_cli for mode in self.modes for mode_cli in self.modes[mode]],
-                                      help=self.create_mode_help_text())
+                                      help=self.create_avail_modes_text())
         self.mode_parser.add_argument("-v", "--verbose", default=False, action="store_true",
                                       help="enable debug printing")
         self.args = OneLiner.Args()
@@ -51,7 +70,9 @@ class OneLiner:
     def parse_cli(self):
         self.mode_parser.parse_known_args(namespace=self.args)
 
-        mode_specific_parser = argparse.ArgumentParser(parents=[self.mode_parser])
+        mode_specific_parser = argparse.ArgumentParser(parents=[self.mode_parser],
+                                                       description=self.mode_description(),
+                                                       formatter_class=argparse.RawTextHelpFormatter)
         # modes that require/hold-it-optional one-liner name
         modes_name = ["create", "override", "rename", "print", "dump", "delete"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
@@ -88,20 +109,23 @@ class OneLiner:
         if self.args.verbose:
             self.logger.setLevel(logging.DEBUG)
 
-    def create_mode_help_text(self):
+    def create_avail_modes_text(self):
         mode_help_text = ""
         for mode in self.modes:
             for i, mode_cli in enumerate(self.modes[mode]):
                 if i == 0:
                     if len(self.modes[mode]) == 1:
-                        mode_help_text += mode_cli + ", "
+                        mode_help_text += mode_cli + " -> \t" + self.mode_desc_dict[mode] + "\n"
                     else:
-                        mode_help_text += mode_cli + " [, "
+                        mode_help_text += mode_cli + "\t[aliases: "
                 elif i != len(self.modes[mode]) - 1:
                     mode_help_text += mode_cli + ", "
                 else:
-                    mode_help_text += mode_cli + "], "
+                    mode_help_text += mode_cli + "]" + " -> \t" + self.mode_desc_dict[mode] + "\n"
         return mode_help_text.rstrip(" ").rstrip(",")
+
+    def mode_description(self):
+        return "selected mode -> " + self.args.mode + ": " + self.mode_desc_dict[self.args.mode]
 
     def handle(self):
         self.parse_cli()
