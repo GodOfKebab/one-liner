@@ -15,7 +15,7 @@ ONELINER_PYTHON_EXEC="python3"
 export ONELINER_PYTHON_EXEC
 # PARAMETERS END
 
-# Check to see if there exists an existing installation of the one-liner tool
+# Check to see if there exists an installation of the one-liner tool
 if [ -f "$ONELINER_PATH" ]; then
   read -p "Existing one-liner setup found! Only the one-liner tool will be overridden. Do you want to continue? [y/N] " -r yn
   case "$(echo -e "$yn" | tr -d '[:space:]')" in
