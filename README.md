@@ -84,7 +84,7 @@ help flag like so:
               required:    file
               optional:    name
 
-    override: description: create and override one-liner
+    overwrite: description: create and overwrite one-liner
               aliases:     ov
               required:    name file
               optional:    -
@@ -131,7 +131,7 @@ help flag like so:
 
 It is highly recommended that you install the tool using the
 dev-recommended way. Then, to test your changes, simply run the
-following command to override the one-liner alias.
+following command to overwrite the one-liner alias.
 
     $ python3 one-liner.py init "$(cat one-liner.py)"
 

@@ -41,7 +41,7 @@ class OneLiner:
         self.modes = {
             "init": ["init"],
             "create": ["create", "cr", "touch"],
-            "override": ["override", "ov"],
+            "overwrite": ["overwrite", "ov"],
             "rename": ["rename", "mv"],
             "print": ["print", "pr", "echo"],
             "dump": ["dump", "dmp", "export", "cat"],
@@ -54,7 +54,7 @@ class OneLiner:
         self.mode_desc_dict = {
             "init": "initialize the .one-liner file",
             "create": "create and add one-liner",
-            "override": "create and override one-liner",
+            "overwrite": "create and overwrite one-liner",
             "rename": "rename a one-liner",
             "print": "print the alias line of one-liner",
             "dump": "decode the one-liner and dump it either on the shell or to a file",
@@ -115,7 +115,7 @@ class OneLiner:
                                                        description=self.mode_description(),
                                                        formatter_class=argparse.RawTextHelpFormatter)
         # modes that require/hold-it-optional one-liner name
-        modes_name = ["create", "override", "rename", "print", "dump", "delete"]
+        modes_name = ["create", "overwrite", "rename", "print", "dump", "delete"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
             nargs = "?" if self.args.mode in self.modes["create"] else None
             nargs = 2 if self.args.mode in self.modes["rename"] else nargs
@@ -124,7 +124,7 @@ class OneLiner:
                                               help='alias name for the one-line. If rename mode, first name is the old'
                                                    ' and the second name is the new name.')
         # modes that require/hold-it-optional one-liner filepath
-        modes_name = ["create", "override", "dump"]
+        modes_name = ["create", "overwrite", "dump"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
             mode_specific_parser.add_argument('filepath', type=str, default="",
                                               nargs="?" if self.args.mode in self.modes["dump"] else None,
@@ -136,7 +136,7 @@ class OneLiner:
                                               nargs="?",
                                               help='[CURRENTLY NOT IMPLEMENTED] '
                                                    'if left empty, the program if upload if the last upload was made '
-                                                   'from this computer. To override this, specify verb (pull/push)')
+                                                   'from this computer. To overwrite this, specify verb (pull/push)')
         # modes that require script
         modes_name = ["init"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
@@ -176,9 +176,9 @@ class OneLiner:
         elif self.args.mode in self.modes["print"]:
             self._handle_print(oneLinerDB, self.args.name)
         elif self.args.mode in self.modes["create"]:
-            self._handle_create_override(oneLinerDB, self.args.name, self.args.filepath)
-        elif self.args.mode in self.modes["override"]:
-            self._handle_create_override(oneLinerDB, self.args.name, self.args.filepath, override=True)
+            self._handle_create_overwrite(oneLinerDB, self.args.name, self.args.filepath)
+        elif self.args.mode in self.modes["overwrite"]:
+            self._handle_create_overwrite(oneLinerDB, self.args.name, self.args.filepath, overwrite=True)
         elif self.args.mode in self.modes["rename"]:
             self._handle_rename(oneLinerDB, self.args.name[0], self.args.name[1])
         elif self.args.mode in self.modes["dump"]:
@@ -258,7 +258,7 @@ class OneLiner:
     def _handle_init(self, oneLinerDB, script):
         print("{} Initializing...".format(self.fmt.rocket))
 
-        self._handle_create_override(oneLinerDB, "one-liner", script.encode('utf-8'), init=True)
+        self._handle_create_overwrite(oneLinerDB, "one-liner", script.encode('utf-8'), init=True)
 
         # add the "source $HOME/.one-liner" to the .bashrc/.zshrc
         rc_file = "{}/.{}rc".format(os.environ["HOME"], os.environ["SHELL"].split("/")[-1])
@@ -283,7 +283,7 @@ class OneLiner:
         except KeyError:
             self.logger.error("This one-liner doesn't exist! {}".format(self.fmt.crossmark))
 
-    def _handle_create_override(self, oneLinerDB, name, filepath, override=False, init=False):
+    def _handle_create_overwrite(self, oneLinerDB, name, filepath, overwrite=False, init=False):
         one_liner_name = name if name != "" else filepath.rstrip(".py").split("/")[-1]
 
         byte_array = filepath if init else open(filepath, encoding='utf-8').read().encode('utf-8')
@@ -294,21 +294,21 @@ class OneLiner:
                                                                                    self.one_liner_python_exec,
                                                                                    base64_zlib_result)
         # check for the conflicts between the mode selected and the provided args
-        mode_args_no_conflict = ((one_liner_name not in oneLinerDB.keys()) and not override) or \
-                             ((one_liner_name in oneLinerDB.keys()) and (override))
+        mode_args_no_conflict = ((one_liner_name not in oneLinerDB.keys()) and not overwrite) or \
+                             ((one_liner_name in oneLinerDB.keys()) and (overwrite))
         # edit the temporary DB object but hold to check mode
         oneLinerDB[one_liner_name] = {"entire_line": one_liner,
                                       "comments": ['', "{} sync below {}".format("#" * 10, "#" * 10) if init else '']}
         action = ""
         if mode_args_no_conflict:
             self.construct_doc(oneLinerDB)
-            action = "Creating" if not override else "Overwriting"
+            action = "Creating" if not overwrite else "Overwriting"
         else:
             if init:
                 self._ask_approval("Existing one-liner setup found! Only the one-liner tool will be {} {}".
                                    format(self.fmt.bold_text("overridden"), self.fmt.warning))
                 action = "Overwriting"
-            elif override:
+            elif overwrite:
                 self._ask_approval("The one-liner '{}' does not exist and a new one will be created {}".
                                    format(self.fmt.bold_text(one_liner_name), self.fmt.warning))
                 action = "Creating"
@@ -350,7 +350,7 @@ class OneLiner:
         except KeyError:
             self.logger.error("This one-liner doesn't exist! {}".format(self.fmt.crossmark))
         except FileExistsError:
-            self.logger.warning("Override protection: This file already exists! {}".format(self.fmt.warning))
+            self.logger.warning("Overwrite protection: This file already exists! {}".format(self.fmt.warning))
             self._ask_approval("The existing file will be overwritten.")
             base64_code = re.search("'\"'\"'.*'\"'\"'", oneLinerDB[name]["entire_line"]).group().strip("'\"'\"'")
             with open(filepath, 'w', encoding='utf-8') as new_file:
