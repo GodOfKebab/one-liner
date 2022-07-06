@@ -14,6 +14,19 @@ class OneLiner:
         mode = name = filepath = script = verb = ""
         verbose = yes = False
 
+    class Formatter:
+        def green_text(self, format_str):
+            return '\033[92m' + format_str + '\033[0m'
+
+        def red_text(self, format_str):
+            return '\033[91m' + format_str + '\033[0m'
+
+        def bold_text(self, format_str):
+            return '\033[1m' + format_str + '\033[0m'
+
+        def underline_text(self, format_str):
+            return '\033[4m' + format_str + '\033[0m'
+
     def __init__(self, cmd_args):
         self.modes = {
             "init": ["init"],
@@ -76,6 +89,8 @@ class OneLiner:
         self.mode_parser.add_argument("-y", "--yes", default=False, action="store_true",
                                       help="skip the 'Do you want to continue? [y/N]' prompt")
         self.args = OneLiner.Args()
+
+        self.fmt = OneLiner.Formatter()
 
     def parse_cli(self):
         try:
@@ -279,11 +294,15 @@ class OneLiner:
             self._source()
         else:
             if init:
-                self._ask_approval("Existing one-liner setup found! Only the one-liner tool will be overridden.")
+                self._ask_approval("Existing one-liner setup found! Only the one-liner tool will be {}.".
+                                   format(self.fmt.bold_text("overridden")))
             elif override:
-                self._ask_approval("The one-liner '{}' does not exist and a new one will be created.".format(one_liner_name))
+                self._ask_approval("The one-liner '{}' does not exist and a new one will be created.".
+                                   format(self.fmt.bold_text(one_liner_name)))
             else:
-                self._ask_approval("The one-liner '{}' already exists and will be overridden.".format(one_liner_name))
+                self._ask_approval("The one-liner '{}' already exists and will be {}.".
+                                   format(self.fmt.bold_text(one_liner_name),
+                                          self.fmt.bold_text("overridden")))
             self.construct_doc(oneLinerDB)
             self._source()
 
@@ -293,7 +312,8 @@ class OneLiner:
             popped['entire_line'] = "alias " + new_name + \
                                     popped['entire_line'].lstrip(" ").lstrip("alias").lstrip(" ").lstrip(old_name)
             oneLinerDB[new_name] = popped
-            self._ask_approval("You are about to rename a one-liner from '{}' to '{}'.".format(old_name, new_name))
+            self._ask_approval("You are about to rename a one-liner from '{}' to '{}'.".
+                               format(self.fmt.bold_text(old_name), self.fmt.bold_text(new_name)))
             self.construct_doc(oneLinerDB)
         except KeyError:
             self.logger.error("This one-liner doesn't exist!")
@@ -324,7 +344,7 @@ class OneLiner:
     def _handle_delete(self, oneLinerDB, name):
         try:
             oneLinerDB.pop(name)
-            self._ask_approval("You are about to delete the one-liner: '{}'.".format(name))
+            self._ask_approval("You are about to {} the one-liner: '{}'.".format(self.fmt.bold_text("delete"), name))
             self.construct_doc(oneLinerDB)
         except KeyError:
             self.logger.error("This one-liner doesn't exist!")
