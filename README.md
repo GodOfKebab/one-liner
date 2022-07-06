@@ -44,7 +44,7 @@ help flag like so:
 
 ### Example Usage
 
-    $ one-liner create greet_the_god src/welcome_god_of_kebab.py
+    $ one-liner create greet_the_god scripts/welcome_god_of_kebab.py
       
       Execute the following in shell for changes to take effect:
           source .../.one-liner
@@ -64,7 +64,7 @@ help flag like so:
     
       for line in text.split('\n'):
           print(line)
-          sleep(0.05)
+          sleep(0.01)
     
       **************************************************
     $ one-liner rm greet_the_god
