@@ -138,7 +138,6 @@ following command to overwrite the one-liner alias.
 ## TODO List:
 
 - [ ] proper logging (verbose flag isn't fully functional yet)
-- [ ] are you sure? prompt
 - [ ] add install.sh arguments so that DX is better
 - [ ] add test codes to automate testing going forward
 - [ ] enable sync mode
