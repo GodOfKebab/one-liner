@@ -7,6 +7,7 @@ import os
 import re
 import logging
 import zlib
+import traceback
 
 
 class OneLiner:
@@ -418,4 +419,8 @@ class OneLiner:
 
 if __name__ == "__main__":
     oneLiner = OneLiner(sys.argv[1:])
-    oneLiner.handle()
+    try:
+        oneLiner.handle()
+    except Exception as e:
+        oneLiner.logger.error(oneLiner.fmt.crossmark + " " + e.strerror + " (add -v flag to see debug message)")
+        oneLiner.logger.debug(oneLiner.fmt.lookbelow + '\n' + traceback.format_exc())
