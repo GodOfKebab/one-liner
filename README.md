@@ -28,7 +28,7 @@ to the tool. This installation will leave the repo code folder and
 
     $ git clone git@github.com:GodOfKebab/one-liner.git
     $ cd one-liner
-    $ python3 one-liner.py init  "$(cat one-liner.py)" 
+    $ python3 one-liner.py init "$(cat one-liner.py)" 
 
 ## Quickstart Guide:
 ### Usage
@@ -38,25 +38,27 @@ To use this tool, first, specify your mode and then the arguments it can take.
     $ one-liner mode [-h] [-v] OPTIONS
 
 To view the arguments that a mode takes, simply type the mode with the 
-help flag like so:
+help flag, like so:
 
     $ one-liner create -h
 
 ### Example Usage
 
     $ one-liner create greet_the_god scripts/welcome_god_of_kebab.py
-      
-      Execute the following in shell for changes to take effect:
-          source .../.one-liner
-    
+      Creating one-liner 'greet_the_god' is successful 💥
+
+      👍 Execute the following in shell for changes to take effect:
+           source .../.one-liner
+
     $ one-liner ls
       greet_the_god
     $ one-liner echo greet_the_god
-    
-        alias greet_the_god='python3 -c "import base64; import zlib; decoded_string = zlib.decompress(base64.b64decode(b'"'"'eNo1TbsKAjEQ7PcrpktW5DgEmwNrCwtLm2vudAMLeZFL4eebBJxmmGEerqSArVRoyKnRiVx3qgb5W4cXyVTlW3FDp0vLW/MS/05BzljjPX2ApwMesm87sLBhIpcKvMa2E0dtOrLXVlyj4YXQkIvGanuGhx5Pdp7mK9MPXEIv4Q=='"'"')).decode(); exec(decoded_string)"'    
-    
+      ✅ Below is the alias for the one-liner 'greet_the_god' 👇
+
+          alias greet_the_god='python3 -c "import base64; import zlib; decoded_string = zlib.decompress(base64.b64decode(b'"'"'eNo1TbsKAjEQ7PcrpktW5DgtD6wtLCxtrrnTDSzkRS6Fn28ScJphhnm4kgK2UqEhp0Ynct2pGuRvHV4kU5VvxQ2dri1vzUv8OwU5Y4339AGeDnjIvu3AwoaJXCrwGttOHLXpyF5bcY2GF0JDLhqr7RkeejzZeZovTD9cNi/d'"'"')).decode(); exec(decoded_string)"'
+
     $ one-liner cat greet_the_god
-      WARNING: filepath is not specified, dumping to the terminal
+      WARNING: filepath is not specified ❌ , dumping to the terminal 👇
       **************************************************
       from art import *
       from time import sleep
@@ -66,8 +68,10 @@ help flag like so:
           print(line)
           sleep(0.01)
     
-      **************************************************
+    **************************************************
     $ one-liner rm greet_the_god
+      You are about to delete the one-liner: 'greet_the_god' ⚠️ Do you want to continue? [y/N] y
+      Deleting 'greet_the_god' is successful 💥
     $ one-liner ls
     $ one-liner fix
     $
@@ -130,15 +134,7 @@ help flag like so:
 ## Developer's Guide
 
 It is highly recommended that you install the tool using the
-dev-recommended way. Then, to test your changes, simply run the
+dev-recommended way if you want to develop the tool. Then, to test your changes, simply run the
 following command to overwrite the one-liner alias.
 
-    $ python3 one-liner.py init "$(cat one-liner.py)"
-
-## TODO List:
-
-- [ ] proper logging (verbose flag isn't fully functional yet)
-- [ ] add install.sh arguments so that DX is better
-- [ ] add test codes to automate testing going forward
-- [ ] enable sync mode
-
+    $ python3 one-liner.py -y init "$(cat one-liner.py)"; source $HOME/.one-liner 
