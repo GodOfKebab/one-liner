@@ -280,7 +280,9 @@ class OneLiner:
 
     def _handle_print(self, oneLinerDB, name):
         try:
-            print("\n\t" + oneLinerDB[name]["entire_line"] + "\n")
+            oneLinerLine = oneLinerDB[name]["entire_line"]
+            print("Below is the alias for the one-liner '{}' {}".format(self.fmt.bold_text(name), self.fmt.lookbelow))
+            print("\n\t" + oneLinerLine + "\n")
         except KeyError:
             self.logger.error("This one-liner doesn't exist! {}".format(self.fmt.crossmark))
 
