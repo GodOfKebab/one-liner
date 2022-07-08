@@ -33,14 +33,52 @@ to the tool. This installation will leave the repo code folder and
 ## Quickstart Guide:
 ### Usage
 
-To use this tool, first, specify your mode and then the arguments it can take.
+To use this tool, first, specify your mode and then the arguments it takes (if any).
 
     $ one-liner mode [-h] [-v] OPTIONS
+
+To view the available modes simply type the mode with the 
+help flag, like so:
+
+    $ one-liner -h
+      usage: one-liner [-h] [-v] mode [mode-specific-required-args]...
+    
+      Manage one-liner python executable commands without relying on the original script file.To view the required arg(s) for each of the modes, add the help flag (-h) to the mode. For example, -> one-liner create -h
+    
+      positional arguments:
+        mode           init ->        initialize the .one-liner file
+                       create [aliases: cr, touch] ->         create and add one-liner
+                       overwrite      [aliases: ov] ->        create and overwrite one-liner
+                       rename [aliases: mv] ->        rename a one-liner
+                       print  [aliases: pr, echo] ->  print the alias line of one-liner
+                       dump   [aliases: dmp, export, cat] ->  decode the one-liner and dump it either on the shell or to a file
+                       list   [aliases: ls] ->        list the all one-liners
+                       delete [aliases: del, rm] ->   remove a one-liner
+                       fix    [aliases: format] ->    fix .one-liner file by parsing and construct the .one-liner file again
+                       sync ->        encrypt all the one-liners and sync with the one-liner servers (not functional)
+    
+      optional arguments:
+        -h, --help     show this help message and exit
+        -v, --verbose  enable debug printing
+        -y, --yes      skip the 'Do you want to continue? [y/N]' prompt
+
 
 To view the arguments that a mode takes, simply type the mode with the 
 help flag, like so:
 
     $ one-liner create -h
+      usage: one-liner create [-h] [-v] [-y] [name] filepath
+    
+      selected mode -> create: create and add one-liner
+    
+      positional arguments:
+        name           alias name for the one-line. If rename mode, first name is the old and the second name is the new name.
+        filepath       file path for the python script to be converted to/from one-liner
+    
+      optional arguments:
+        -h, --help     show this help message and exit
+        -v, --verbose  enable debug printing
+        -y, --yes      skip the 'Do you want to continue? [y/N]' prompt
 
 ### Example Usage
 
