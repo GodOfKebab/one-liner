@@ -48,8 +48,22 @@ help flag, like so:
       Creating one-liner 'greet_the_god' is successful 💥
 
       👍 Execute the following in shell for changes to take effect:
-           source .../.one-liner
+           source /USERS-HOME/YOUR-USERNAME/.one-liner
 
+    $ source /USERS-HOME/YOUR-USERNAME/.one-liner
+    $ greet_the_god
+      __        __       _                                   
+      \ \      / /  ___ | |  ___   ___   _ __ ___    ___     
+       \ \ /\ / /  / _ \| | / __| / _ \ | '_ ` _ \  / _ \    
+        \ V  V /  |  __/| || (__ | (_) || | | | | ||  __/ _  
+         \_/\_/    \___||_| \___| \___/ |_| |_| |_| \___|( ) 
+                                                         |/  
+        ____             _     ___    __    _  __       _             _          __  
+       / ___|  ___    __| |   / _ \  / _|  | |/ /  ___ | |__    __ _ | |__     _ \ \ 
+      | |  _  / _ \  / _` |  | | | || |_   | ' /  / _ \| '_ \  / _` || '_ \   (_) | |
+      | |_| || (_) || (_| |  | |_| ||  _|  | . \ |  __/| |_) || (_| || |_) |   _  | |
+       \____| \___/  \__,_|   \___/ |_|    |_|\_\ \___||_.__/  \__,_||_.__/   (_) | |
+                                                                                 /_/
     $ one-liner ls
       greet_the_god
     $ one-liner echo greet_the_god
