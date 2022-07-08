@@ -74,6 +74,7 @@ help flag, like so:
       Deleting 'greet_the_god' is successful 💥
     $ one-liner ls
     $ one-liner fix
+      ✅  Parsing and de-parsing the .one-liner file was successful! 👍
     $
 
 ## Available modes:
