@@ -190,6 +190,8 @@ class OneLiner:
             self._handle_delete(oneLinerDB, self.args.name)
         elif self.args.mode in self.modes["fix"]:
             self.construct_doc(oneLinerDB)
+            print("{}  Parsing and de-parsing the .one-liner file was successful! {}".
+                  format(self.fmt.checkmark, self.fmt.thumbsup))
         elif self.args.mode in self.modes["sync"]:
             self._handle_sync(oneLinerDB, self.args.verb)
 
