@@ -120,7 +120,7 @@ help flag, like so:
           print(line)
           sleep(0.01)
     
-    **************************************************
+      **************************************************
     $ one-liner rm greet_the_god
       You are about to delete the one-liner: 'greet_the_god' ⚠️ Do you want to continue? [y/N] y
       Deleting 'greet_the_god' is successful 💥
@@ -178,11 +178,15 @@ help flag, like so:
               required:    -
               optional:    -
 
-    sync[N]:  description: encrypt all the one-liners and sync
-                           with the one-liner servers (not functional)
-              aliases:     - 
-              required:    -
-              optional:    pull/push
+[//]: # (    sync[N]:  description: encrypt all the one-liners and sync)
+
+[//]: # (                           with the one-liner servers &#40;not functional&#41;)
+
+[//]: # (              aliases:     - )
+
+[//]: # (              required:    -)
+
+[//]: # (              optional:    pull/push)
 
 ## Developer's Guide
 
