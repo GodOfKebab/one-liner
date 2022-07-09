@@ -43,7 +43,7 @@ help flag, like so:
     $ one-liner -h
       usage: one-liner [-h] [-v] mode [mode-specific-required-args]...
     
-      Manage one-liner python executable commands without relying on the original script file.To view the required arg(s) for each of the modes, add the help flag (-h) to the mode. For example, -> one-liner create -h
+      Manage one-liner python bash aliases without relying on the original script file. To view the required arg(s) for each of the modes, add the help flag (-h) to the mode. For example, -> one-liner create -h
     
       positional arguments:
         mode           init ->        initialize the .one-liner file
