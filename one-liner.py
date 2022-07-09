@@ -26,17 +26,8 @@ class OneLiner:
         warning = '⚠️'
         crossmark = '❌ '
 
-        def green_text(self, format_str):
-            return '\033[92m' + format_str + '\033[0m'
-
-        def red_text(self, format_str):
-            return '\033[91m' + format_str + '\033[0m'
-
         def bold_text(self, format_str):
             return '\033[1m' + format_str + '\033[0m'
-
-        def underline_text(self, format_str):
-            return '\033[4m' + format_str + '\033[0m'
 
     def __init__(self, cmd_args):
         self.modes = {
