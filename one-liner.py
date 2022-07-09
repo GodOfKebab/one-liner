@@ -85,7 +85,7 @@ class OneLiner:
 
         # Check to see if the only argument is the -h or --help
         self.mode_parser = argparse.ArgumentParser(add_help=self.help_only,
-                                                   description='Manage one-liner python executable commands '
+                                                   description='Manage one-liner python bash aliases '
                                                                'without relying on the original script file.'
                                                                'To view the required arg(s) for each of the modes, '
                                                                'add the help flag (-h) to the mode. '
