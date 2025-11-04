@@ -55,7 +55,6 @@ help flag, like so:
                        list   [aliases: ls] ->        list the all one-liners
                        delete [aliases: del, rm] ->   remove a one-liner
                        fix    [aliases: format] ->    fix .one-liner file by parsing and construct the .one-liner file again
-                       sync ->        encrypt all the one-liners and sync with the one-liner servers (not functional)
     
       optional arguments:
         -h, --help     show this help message and exit

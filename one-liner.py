@@ -62,7 +62,6 @@ class OneLiner:
             "list": "list the all one-liners",
             "delete": "remove a one-liner",
             "fix": "fix .one-liner file by parsing and construct the .one-liner file again",
-            "sync": "encrypt all the one-liners and sync with the one-liner servers (not functional)",
         }
         # make sure that the aliases are correctly interpreted
         for mode in list(self.mode_desc_dict.keys()).copy():
