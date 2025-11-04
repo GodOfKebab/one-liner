@@ -1,17 +1,17 @@
 # one-liner
-This is the tool I use for creating one-liner python executables.
+This is the tool I use for creating one-liner python bash aliases.
 Basically, this tool will convert your python script to a one-line
 bash alias by using compression and base64 encoding of the script
-file and then saving it to a source-able file so that you can
-execute the one-liner script without relying on any script file. 
-This way, even if the original script file is deleted/moved, since
-the contents of it would be encoded in the one-liner alias, you can
+file and then saving it to a source-able file (at $HOME/.one-liner) 
+so that you can use that python script without relying on the original
+script file. This way, even if the original script file is deleted/moved,
+since its contents would be encoded in the one-liner alias, you can
 still use the script.
 
 This tool is especially useful if the script's path changes often
 or if you don't want to risk the execution of a script if the path 
 changes. Other use cases may include the easy creation of python
-executables.
+executable-likes.
 
 ## Installation:
 ### one-liner install [recommended]
@@ -43,7 +43,7 @@ help flag, like so:
     $ one-liner -h
       usage: one-liner [-h] [-v] mode [mode-specific-required-args]...
     
-      Manage one-liner python executable commands without relying on the original script file.To view the required arg(s) for each of the modes, add the help flag (-h) to the mode. For example, -> one-liner create -h
+      Manage one-liner python bash aliases without relying on the original script file. To view the required arg(s) for each of the modes, add the help flag (-h) to the mode. For example, -> one-liner create -h
     
       positional arguments:
         mode           init ->        initialize the .one-liner file
@@ -119,7 +119,7 @@ help flag, like so:
           print(line)
           sleep(0.01)
     
-    **************************************************
+      **************************************************
     $ one-liner rm greet_the_god
       You are about to delete the one-liner: 'greet_the_god' ⚠️ Do you want to continue? [y/N] y
       Deleting 'greet_the_god' is successful 💥
@@ -177,11 +177,15 @@ help flag, like so:
               required:    -
               optional:    -
 
-    sync[N]:  description: encrypt all the one-liners and sync
-                           with the one-liner servers (not functional)
-              aliases:     - 
-              required:    -
-              optional:    pull/push
+[//]: # (    sync[N]:  description: encrypt all the one-liners and sync)
+
+[//]: # (                           with the one-liner servers &#40;not functional&#41;)
+
+[//]: # (              aliases:     - )
+
+[//]: # (              required:    -)
+
+[//]: # (              optional:    pull/push)
 
 ## Developer's Guide
 
