@@ -8,7 +8,6 @@ ONELINER_PYTHON_URL="https://raw.githubusercontent.com/GodOfKebab/one-liner/mast
 
 # PARAMETERS START
 ONELINER_PATH="$HOME/.one-liner"
-#ONELINER_PATH="$(pwd)/.one-liner" # DEBUG
 export ONELINER_PATH
 
 ONELINER_PYTHON_EXEC="python3"
@@ -17,8 +16,9 @@ export ONELINER_PYTHON_EXEC
 
 # Check to see if there exists an installation of the one-liner tool
 if [ -f "$ONELINER_PATH" ]; then
-  read -p "Existing one-liner setup found! Only the one-liner tool will be overridden. Do you want to continue? [y/N] " -r yn
-  case "$(echo -e "$yn" | tr -d '[:space:]')" in
+  read -p "Existing one-liner setup found! Only the one-liner tool will be overridden. Do you want to continue? [y/N] " yn
+  yn=$(echo "$yn" | tr -d '[:space:]')
+  case "$yn" in
       [Yy]* ) ;;
       * ) echo "Aborting..."; exit;;
   esac
@@ -27,5 +27,4 @@ else
 fi
 
 curl -Ls $ONELINER_PYTHON_URL | python3 - init "$(curl -Ls $ONELINER_PYTHON_URL)" -y
-#python3 "$(dirname "$0")/one-liner.py" init "$(cat "$(dirname "$0")/one-liner.py")" # DEBUG
 
