@@ -177,16 +177,6 @@ help flag, like so:
               required:    -
               optional:    -
 
-[//]: # (    sync[N]:  description: encrypt all the one-liners and sync)
-
-[//]: # (                           with the one-liner servers &#40;not functional&#41;)
-
-[//]: # (              aliases:     - )
-
-[//]: # (              required:    -)
-
-[//]: # (              optional:    pull/push)
-
 ## Developer's Guide
 
 It is highly recommended that you install the tool using the

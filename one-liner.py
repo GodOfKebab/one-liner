@@ -40,7 +40,6 @@ class OneLiner:
             "list": ["list", "ls"],
             "delete": ["delete", "del", "rm"],
             "fix": ["fix", "format"],
-            "sync": ["sync"]
         }
 
         self.mode_desc_dict = {
@@ -120,14 +119,6 @@ class OneLiner:
             mode_specific_parser.add_argument('filepath', type=str, default="",
                                               nargs="?" if self.args.mode in self.modes["dump"] else None,
                                               help='file path for the python script to be converted to/from one-liner')
-        # modes that require verb (pull/push)
-        modes_name = ["sync"]
-        if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
-            mode_specific_parser.add_argument('verb', type=str, choices=["pull", "push"],
-                                              nargs="?",
-                                              help='[CURRENTLY NOT IMPLEMENTED] '
-                                                   'if left empty, the program if upload if the last upload was made '
-                                                   'from this computer. To overwrite this, specify verb (pull/push)')
         # modes that require script
         modes_name = ["init"]
         if self.args.mode in [a for l in self.modes.items() if l[0] in modes_name for a in l[1]]:
@@ -182,8 +173,6 @@ class OneLiner:
             self.construct_doc(oneLinerDB)
             print("{}  Parsing and de-parsing the .one-liner file was successful! {}".
                   format(self.fmt.checkmark, self.fmt.thumbsup))
-        elif self.args.mode in self.modes["sync"]:
-            self._handle_sync(oneLinerDB, self.args.verb)
 
     def parse_doc(self):
         oneLinerDB = {"info_and_params": {"contents": ""}}
@@ -364,35 +353,6 @@ class OneLiner:
             self.construct_doc(oneLinerDB)
         except KeyError:
             self.logger.error("This one-liner doesn't exist! {}".format(self.fmt.crossmark))
-
-    def _handle_sync(self, oneLinerDB, verb):
-        self.logger.warning("This feature isn't implemented yet.")
-
-        from cryptography.fernet import Fernet
-
-        one_liners = sorted(oneLinerDB.keys())
-        one_liners.remove("one-liner")
-        one_liners.remove("info_and_params")
-        byte_code = b""
-        for one_liner in one_liners:
-            for part in [oneLinerDB[one_liner]["comments"][0],
-                         oneLinerDB[one_liner]["entire_line"],
-                         oneLinerDB[one_liner]["comments"][1]]:
-                byte_code += (part + "\n").encode("utf-8")
-        if self.args.verbose:
-            print(byte_code, end="\n\n")
-        byte_code = zlib.compress(byte_code, 9)
-
-        key = Fernet.generate_key()
-        f = Fernet(key)
-        ciphertext = f.encrypt(byte_code)
-        if self.args.verbose:
-            print("The size of the ciphertext is {} KB".format(len(ciphertext) / 1024.))
-            print(ciphertext, end="\n\n")
-        decrypted_msg = f.decrypt(ciphertext)
-        decrypted_msg = zlib.decompress(decrypted_msg)
-        if self.args.verbose:
-            print(decrypted_msg, end="\n\n")
 
     def _source(self):
         print("\n{} Execute the following in shell for changes to take effect:".format(self.fmt.thumbsup))
